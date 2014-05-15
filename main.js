@@ -10,18 +10,18 @@ var swig = require('swig');
 var config = require('./config.js');
 var router = require('./router.js');
 
-//static folders
-app.use('/assets', express.static(path.join(__dirname, '/assets'))); 
-app.use('/downloads', express.static(path.join(__dirname, '/downloads'))); 
+//static url and paths
+for(var key in config.statics){
+    app.use('/'+key, express.static(path.join(__dirname, config.statics[key]))); 
+}
 
 //views
-app.set('views', __dirname+'/');
+app.set('views', __dirname);
 app.set('view engine', 'html'); //
-app.engine('html', consolidate.swig); //if without consolidate-> app.engine('html', swig.renderFile);
+app.engine('html', consolidate.swig); //without consolidate-> app.engine('html', swig.renderFile);
 app.engine('jade', consolidate.jade);
     
-    
-    
+
 var sample = router.use({
     namespace:'sample'
 });
