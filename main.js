@@ -7,8 +7,12 @@ var app = express();
 var consolidate = require('consolidate');
 var swig = require('swig');
 
+
+var dnodes = require('./dnodes/dnodes.js');
+var router = require('./dnodes/router.js');
+
 var config = require('./config.js');
-var router = require('./router.js');
+
 
 //static url and paths
 for(var key in config.statics){
@@ -22,12 +26,12 @@ app.engine('html', consolidate.swig); //without consolidate-> app.engine('html',
 app.engine('jade', consolidate.jade);
     
 
-var sample = router.default_configs({
-    namespace:'sample'
+var sampleapp = router.default_configs({
+    namespace:'sampleapp'
 });
-router.initialize(sample);
-app.all('/sample/*',function(req, res){
-    router.route(sample, req, res, 1);
+router.initialize(sampleapp);
+app.all('/sampleapp/*',function(req, res){
+    router.route(sampleapp, req, res, 1);
 });
 
 app.listen(config.port, function(){
