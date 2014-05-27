@@ -22,7 +22,7 @@ app.engine('html', consolidate.swig); //without consolidate-> app.engine('html',
 app.engine('jade', consolidate.jade);
     
 
-var sample = router.use({
+var sample = router.default_configs({
     namespace:'sample'
 });
 router.initialize(sample);

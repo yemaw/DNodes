@@ -1,13 +1,13 @@
 var fs  = require('fs');
 var url = require('url');
 
-exports.use = use;
+exports.default_configs = default_configs;
 exports.initialize = initialize;
 exports.route = route;
 
 var controllers = [];
 
-function use(configs){
+function default_configs(configs){
     
     var app = {};
     app.namespace = configs.namespace;
