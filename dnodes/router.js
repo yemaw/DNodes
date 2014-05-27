@@ -71,8 +71,8 @@ function route(app, req, res, segments){
      Assume current router is routed to http://api.data.com:3000/myapp/
      */
     
-    //
-    meta = app; //copy all app values to meta.
+    //all config values
+    meta = app; 
      
     var _uris = url.parse(req.url,true, true);
     
@@ -143,9 +143,7 @@ function route(app, req, res, segments){
     //default view file name
     meta.view_file = app.app_path+app.views_dir+'/'+meta.segments[0]+'.'+app.view_extension;
     
-    meta.do_response = function(meta, status, data){
-        handle_response(meta, status, data);
-    }
+    meta.do_response = do_response;
 
     /*
     //Flash message
@@ -182,7 +180,7 @@ function route(app, req, res, segments){
     }
 }
 
-function handle_response(meta, status, data){
+function do_response(meta, status, data){
     
     if (meta.response_type == 'html'){
         var code = parseInt(status.code) || 200;

@@ -1,3 +1,8 @@
+var config = require('./config.js');
+
+if(config.nodetime.accountKey && config.nodetime.appName){
+    require('nodetime').profile(config.nodetime);
+}
 
 var path = require('path');
 
@@ -10,9 +15,6 @@ var swig = require('swig');
 
 var dnodes = require('./dnodes/dnodes.js');
 var router = require('./dnodes/router.js');
-
-var config = require('./config.js');
-
 
 //static url and paths
 for(var key in config.statics){
