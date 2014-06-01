@@ -21,7 +21,7 @@ var authenticator = require('./dnodes/authenticator/');
 //middlewares
 app.use(bodyParser());
 
-var router = require('./dnodes/router.js');
+var router = require('./dnodes/router');
 
 
 //static url and paths
