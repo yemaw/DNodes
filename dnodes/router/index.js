@@ -12,13 +12,19 @@ var ioc = []; //IOC container for all sub applications(app)
 
 function map(configs){
     
+    if(!configs.app_uri || !configs.app_dir){
+        console.log('app_uri & app_dir must\'t empty');
+        return;
+    }
+    
     var app = {};
     
     app = configs;
     
-    app.app_uri   = app.app_uri;
-    app.app_dir   = app.app_dir;
-    app.namespace = app.namespace || app.app_uri.replace(/\//g,'').replace(/\*/g,'');
+    app.app_uri   = configs.app_uri;
+    app.app_dir   = configs.app_dir;
+    
+    app.namespace = app.app_uri.replace(/\//g,'').replace(/\*/g,'');
     
     app.controllers_dir = configs.controllers_dir || 'controllers';
     app.views_dir       = configs.views_dir || 'views';
@@ -62,17 +68,42 @@ function map(configs){
     return app;
 }
 
-function route(req, res, next, app){
+function route(req, res, next){
     
-    if(!app){
-        //find controller namespace from url   
+    var i,j;
+    
+    //finding registered handler in ioc container for requested url
+    var namespace;
+    var nss = req.originalUrl.split('?')[0].split('/');
+    var nss_arr = [];
+    for(i=0; i<nss.length; i++){
+        var ns = '';
+        for(j=0; j<nss.length; j++){
+            if(j<i){
+                ns += nss[j];
+            }
+        }
+        if(ns){
+            nss_arr.push(ns);    
+        }
     }
-    app = ioc[app.namespace]['app'];
+    nss_arr = uniqueArray(nss_arr);
+    nss_arr.reverse();
+    for(i=0; i<nss_arr.length; i++){
+        if(ioc[nss_arr[i]]){
+            namespace = nss_arr[i];
+            break; 
+        }    
+    }
+    if(!namespace){
+        console.log('bad');
+    }
+    
+    var app = ioc[namespace]['app'];
     var segments = app.total_segments;
     
-    
     var meta = {};
-    var i,j;
+    
     /*
      Example URL : http://api.data.com:3000/myapp/do_something/12345/edit?cat=3&dog=4#hash
      Assume current router is routed to http://api.data.com:3000/myapp/
@@ -85,7 +116,7 @@ function route(req, res, next, app){
     
     //All segments(start after hostname) in an array => segments[0] = myapp, segments[1] = do_something ...
     var all_segments = _uris.pathname.substring(1).split('/');
-    console.log(all_segments);
+    
     var _sub_segments = [];
     j=0;
     for(i=0; i<all_segments.length-segments; i++){
@@ -208,6 +239,12 @@ function getNumberOfSegments(uri){
         }
     });
     return count;
+}
+
+function uniqueArray(arr){
+    return arr.reverse().filter(function (e, i, arr) {
+        return arr.indexOf(e, i+1) === -1;
+    }).reverse();    
 }
 
 function isJSExt(full_file_name){
