@@ -12,7 +12,9 @@
     "nodetime": "~0.8.15",
     "passport": "~0.2.0",
     "passport-local": "~1.0.0",
-    "mongoose": "~3.8.11"
+    "mongoose": "~3.8.11",
+    "express-session": "~1.2.1",
+    "cookie-parser": "~1.1.0"
   },
   "devDependencies": {}
 }

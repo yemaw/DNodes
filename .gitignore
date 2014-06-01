@@ -1,4 +1,5 @@
 /node_modules/*
 /applications/*
+/assets/*
 config.js
 applications.js

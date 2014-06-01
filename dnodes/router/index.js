@@ -66,15 +66,15 @@ function map(config){
             });
         });
     });
-    
+    /*
     var configjs = app.app_path+'config.js';
     fs.exists(configjs, function(exists) {
         if(exists){
             var config = require(configjs);
-            //ioc[app.namespace]['app']['config'] = config;        
+            ioc[app.namespace]['app']['config'] = config;        
         }
     });
-    
+    */
     return app;
 }
 
@@ -105,6 +105,7 @@ function route(req, res, next){
             break; 
         }    
     }
+    
     if(!namespace){
         console.log('something wrong in nampspace deteting');
     }
@@ -140,7 +141,7 @@ function route(req, res, next){
 
     //full_url
     //Full URL of the current request => http://api.data.com:3000/myapp/do_something/12345/edit?cat=3&dog=4#hash
-    app.full_url = req.protocol + "://" + req.get('host') + req.url;
+    app.full_url = req.protocol + "://" + req.get('host') + req.originalUrl;
 
     //protocol
     //Protocol => http or https
@@ -180,7 +181,7 @@ function route(req, res, next){
     //response_type
     //Client is allowed to override the default response type
     app.response_type = app.query.response_type || app.config.response_type;
-    console.log(app.config.response_type);
+    
     //user
     //Current user object
     app.user = req.user ? req.user : {};

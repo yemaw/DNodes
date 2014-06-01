@@ -9,6 +9,8 @@ module.exports = exports = function(config, app){
     
     var User = require('./models/user.js')(connection);
     
+    
+    
     app.use(passport.initialize());
     app.use(passport.session());    
     
