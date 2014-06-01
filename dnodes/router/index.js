@@ -10,32 +10,34 @@ var path = require('path');
 
 var ioc = []; //IOC container for all sub applications(app)
 
-function map(configs){
+function map(config){
     
-    if(!configs.app_uri || !configs.app_dir){
+    if(!config.app_uri || !config.app_dir){
         console.log('app_uri & app_dir must\'t empty');
         return;
     }
     
     var app = {};
     
-    app = configs;
+    app = clone(config);
     
-    app.app_uri   = configs.app_uri;
-    app.app_dir   = configs.app_dir;
+    app.app_uri   = config.app_uri;
+    app.app_dir   = config.app_dir;
     
     app.namespace = app.app_uri.replace(/\//g,'').replace(/\*/g,'');
     
-    app.controllers_dir = configs.controllers_dir || 'controllers';
-    app.views_dir       = configs.views_dir || 'views';
+    app.controllers_dir = config.controllers_dir || 'controllers';
+    app.views_dir       = config.views_dir || 'views';
     
-    app.view_extension = configs.view_extension || 'html';
-    app.response_type  = configs.response_type || 'html';
+    app.response_type  = config.response_type || 'json';
+    app.view_extension = config.view_extension || 'html';
     
     app.total_segments = app.segments || getNumberOfSegments(app.app_uri);
     
     app.root_path = path.dirname(process.mainModule.filename);
     app.app_path  = app.root_path + '/' + app.app_dir + '/'; 
+    
+    app.config = config;
     
     ioc[app.namespace] = {};
     ioc[app.namespace]['controllers'] = {};
@@ -49,7 +51,7 @@ function map(configs){
         
         files.forEach(function(file){
 
-            fs.stat(controllers_path+'/'+file, function(error, stats){
+            fs.stat(controllers_path+file, function(error, stats){
                 if(error) return;
                 if(stats.isFile()){
                     var full_file_name = file.toString();
@@ -57,12 +59,20 @@ function map(configs){
                         return;
                     }
                     var file_name = full_file_name.substring(0, file.toString().length-3); //removing '.js'
-                    var vc = require(controllers_path+'/'+file);
+                    var vc = require(controllers_path+file);
                     
                     ioc[app.namespace]['controllers'][file_name] = vc;
                 }
             });
         });
+    });
+    
+    var configjs = app.app_path+'config.js';
+    fs.exists(configjs, function(exists) {
+        if(exists){
+            var config = require(configjs);
+            //ioc[app.namespace]['app']['config'] = config;        
+        }
     });
     
     return app;
@@ -72,7 +82,7 @@ function route(req, res, next){
     
     var i,j;
     
-    //finding registered handler in ioc container for requested url
+    //finding registered request handler in ioc container for requested url
     var namespace;
     var nss = req.originalUrl.split('?')[0].split('/');
     var nss_arr = [];
@@ -96,7 +106,7 @@ function route(req, res, next){
         }    
     }
     if(!namespace){
-        console.log('bad');
+        console.log('something wrong in nampspace deteting');
     }
     
     var app = ioc[namespace]['app'];
@@ -164,9 +174,13 @@ function route(req, res, next){
     app.third_uri  = app.command = _sub_segments[2];
 
     //query
-    //All quires after question mark => queries.cat=3 , queries.dog=4
+    //All quires after question mark => query.cat=3 , query.dog=4
     app.query = _uris.query;
 
+    //response_type
+    //Client is allowed to override the default response type
+    app.response_type = app.query.response_type || app.config.response_type;
+    console.log(app.config.response_type);
     //user
     //Current user object
     app.user = req.user ? req.user : {};
@@ -202,7 +216,7 @@ function route(req, res, next){
     
     req.dnodes = app;
     
-    /* Calling Service Method from Controllers */
+    /* Calling Request Handler Method from Controllers */
     _sub_segments[0] = _sub_segments[0] ? _sub_segments[0] : 'index'; //set default object as index, currently view file fail
     
     var vc = ioc[app.namespace]['controllers'][_sub_segments[0]];
@@ -251,4 +265,13 @@ function isJSExt(full_file_name){
 
     var parts = full_file_name.split('.');
     return (parts[parts.length-1] != 'js') ? false : true;
+}
+
+function clone(obj) {
+    if (null === obj || "object" != typeof obj) return obj;
+    var copy = obj.constructor();
+    for (var attr in obj) {
+        if (obj.hasOwnProperty(attr)) copy[attr] = obj[attr];
+    }
+    return copy;
 }
